@@ -1,1 +1,10 @@
-da
+id_rsa_n8n
+id_rsa_n8n.pub
+
+# Archivos de estado de Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Variables sensibles
+*.tfvars

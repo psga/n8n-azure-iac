@@ -21,3 +21,13 @@ module "database" {
   vnet_name           = module.network.vnet_name         # <--- Connection between modules
   private_subnet_id   = module.network.private_subnet_id # <--- Connection between modules
 }
+
+# 4. We call the Compute module
+module "compute" {
+  source              = "./modules/compute"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  public_subnet_id    = module.network.public_subnet_id
+  db_host             = module.database.db_host
+  db_password         = module.database.db_password
+}
