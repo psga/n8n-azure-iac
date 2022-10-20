@@ -7,3 +7,4 @@ variable "admin_username" {
 }
 variable "db_host" {}
 variable "db_password" {}
+

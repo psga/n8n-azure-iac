@@ -10,6 +10,7 @@ module "network" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   vnet_cidr           = ["10.0.0.0/16"]
+  my_ip               = "186.121.0.234/32"
 }
 
 # 3. We call the Database module

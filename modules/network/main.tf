@@ -46,16 +46,27 @@ resource "azurerm_network_security_group" "nsg_public" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
   security_rule {
-    name                       = "AllowSSH"
+    name                       = "AllowN8n"
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
+    destination_port_range     = "5678"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*" # when i start to create my vm 
+    source_address_prefix      = var.my_ip # when i start to create my vm 
     destination_address_prefix = "*"
   }
 }

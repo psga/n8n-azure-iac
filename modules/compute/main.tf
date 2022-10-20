@@ -4,6 +4,7 @@ resource "azurerm_public_ip" "n8n_ip" {
   resource_group_name = var.resource_group_name
   location            = var.location
   allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "n8n_nic" {
@@ -33,7 +34,7 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file("./id_rsa_n8n.pub")
   }
 
   os_disk {
@@ -60,8 +61,11 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
   -e DB_POSTGRESDB_PORT=5432 \
   -e DB_POSTGRESDB_DATABASE=n8n_db \
   -e DB_POSTGRESDB_USER=n8nadmin \
-  -e DB_POSTGRESDB_PASSWORD=${var.db_password} \
+  -e DB_POSTGRESDB_PASSWORD='${var.db_password}' \
   -e N8N_ENCRYPTION_KEY=una-clave-secreta-123 \
+  -e DB_POSTGRESDB_SSL_MODE=require \
+  -e DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED=false \
+  -e N8N_SECURE_COOKIE=false \
   --restart always \
   docker.n8n.io/n8nio/n8n
   EOF
