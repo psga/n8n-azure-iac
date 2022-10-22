@@ -8,3 +8,4 @@ da
 
 # Variables sensibles
 *.tfvars
+.gitignore
