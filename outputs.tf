@@ -10,3 +10,7 @@ output "server_db_password" {
 output "n8n_ip" {
   value = module.compute.n8n_ip
 }
+
+output "name_servers" {
+  value = module.dns.name_servers
+}
