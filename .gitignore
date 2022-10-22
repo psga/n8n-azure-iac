@@ -7,5 +7,5 @@ da
 .terraform/
 
 # Variables sensibles
-*.tfvars
 .gitignore
+*.tfvars
