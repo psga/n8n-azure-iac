@@ -35,17 +35,18 @@ resource "azurerm_network_security_group" "nsg_public" {
   location            = azurerm_virtual_network.vnet.location
   resource_group_name = azurerm_virtual_network.vnet.resource_group_name
 
-  security_rule {
-    name                       = "AllowHTTP"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  #  n8n doesnt use port 80, it uses 5678
+  #security_rule {
+  #  name                       = "AllowHTTP"
+  #  priority                   = 100
+  #  direction                  = "Inbound"
+  #  access                     = "Allow"
+  #  protocol                   = "Tcp"
+  #  source_port_range          = "*"
+  #  destination_port_range     = "80"
+  #  source_address_prefix      = "*"
+  #  destination_address_prefix = "*"
+  #}
   security_rule {
     name                       = "AllowN8n"
     priority                   = 110
@@ -54,10 +55,11 @@ resource "azurerm_network_security_group" "nsg_public" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "5678"
-    source_address_prefix      = "*"
+    source_address_prefix      = "10.0.3.0/24"
     destination_address_prefix = "*"
   }
 
+  # This rule is for testing. It is not have impact 
   security_rule {
     name                       = "AllowSSH"
     priority                   = 120
@@ -75,4 +77,10 @@ resource "azurerm_network_security_group" "nsg_public" {
 resource "azurerm_subnet_network_security_group_association" "public_assoc" {
   subnet_id                 = azurerm_subnet.public_subnet.id
   network_security_group_id = azurerm_network_security_group.nsg_public.id
+}
+resource "azurerm_subnet" "gateway_subnet" {
+  name                 = "snet-gateway"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.3.0/24"] # Una subred nueva
 }

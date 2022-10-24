@@ -1,12 +1,12 @@
 # The ip public for for enter to n8n
-resource "azurerm_public_ip" "n8n_ip" {
-  name                = "pip-n8n"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
+#resource "azurerm_public_ip" "n8n_ip" {
+#  name                = "pip-n8n"
+#  resource_group_name = var.resource_group_name
+#  location            = var.location
+#  allocation_method   = "Static"
+#  sku                 = "Standard"
+#}
+#to remove
 resource "azurerm_network_interface" "n8n_nic" {
   name                = "nic-n8n"
   location            = var.location
@@ -15,7 +15,8 @@ resource "azurerm_network_interface" "n8n_nic" {
     name                          = "internal"
     subnet_id                     = var.public_subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.n8n_ip.id
+    #public_ip_address_id          = azurerm_public_ip.n8n_ip.id
+    # to remove
   }
 }
 # VM 
