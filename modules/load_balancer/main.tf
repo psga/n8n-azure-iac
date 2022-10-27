@@ -84,14 +84,27 @@ resource "azurerm_application_gateway" "network" {
     frontend_port_name             = "port_80"
     protocol                       = "Http"
   }
-
+  redirect_configuration {
+    name                 = "http-to-https"
+    redirect_type        = "Permanent"
+    target_listener_name = "listener-https"
+    include_path         = true
+    include_query_string = true
+  }
   ssl_certificate {
     name     = "n8n-cert"
     data     = tls_self_signed_cert.example.cert_pem
     password = "" #in real certs here is the key 
   }
   request_routing_rule {
-    name                       = "n8n-rule"
+    name                        = "rule-http-redirect"
+    rule_type                   = "basic"
+    http_listener_name          = "listener-http"
+    redirect_configuration_name = "http-to-https"
+    priority                    = 20
+  }
+  request_routing_rule {
+    name                       = "rule-https-to-n8n"
     rule_type                  = "basic"
     http_listener_name         = "listener-https"
     backend_address_pool_name  = "n8n-backend-pool"
