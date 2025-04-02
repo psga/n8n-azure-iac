@@ -32,3 +32,9 @@ module "compute" {
   db_host             = module.database.db_host
   db_password         = module.database.db_password
 }
+
+module "dns" {
+  source              = "./modules/DNS"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+}
