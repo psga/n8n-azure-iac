@@ -31,6 +31,7 @@ module "compute" {
   public_subnet_id    = module.network.public_subnet_id
   db_host             = module.database.db_host
   db_password         = module.database.db_password
+  key_vault_name      = module.security.key_vault_name
 }
 
 module "dns" {
@@ -46,4 +47,16 @@ module "load_balancer" {
   location            = azurerm_resource_group.rg.location
   gateway_subnet_id   = module.network.gateway_subnet_id
   vm_private_ip       = module.compute.vm_private_ip
+}
+module "security" {
+  source              = "./modules/security"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  db_password         = module.database.db_password
+}
+
+resource "azurerm_role_assignment" "assign_kv_access" {
+  scope                = module.security.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.compute.vm_principal_id
 }

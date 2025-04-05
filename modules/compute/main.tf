@@ -25,6 +25,9 @@ resource "random_string" "suffix" {
   special = false
   upper   = false
 }
+
+
+
 resource "azurerm_linux_virtual_machine" "n8n_vm" {
   name                  = "vm-n8n-server-${random_string.suffix.result}"
   resource_group_name   = var.resource_group_name
@@ -33,6 +36,9 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
   network_interface_ids = [azurerm_network_interface.n8n_nic.id]
   admin_username        = var.admin_username
 
+  identity {
+    type = "SystemAssigned"
+  }
   admin_ssh_key {
     username   = var.admin_username
     public_key = file("./id_rsa_n8n.pub")
@@ -55,15 +61,19 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
   sudo systemctl start docker
   sudo systemctl enable docker
 
+
+
+  DB_PASS=$(az keyvault secret show --name db-password --vault-name ${var.key_vault_name} --query value -o tsv)
+  ENC_KEY=$(az keyvault secret show --name n8n-encryption-key --vault-name ${var.key_vault_name} --query value -o tsv)
   docker run -d --name n8n \
   -p 5678:5678 \
   -e DB_TYPE=postgresdb \
   -e DB_POSTGRESDB_HOST=${var.db_host} \
   -e DB_POSTGRESDB_PORT=5432 \
   -e DB_POSTGRESDB_DATABASE=n8n_db \
-  -e DB_POSTGRESDB_USER=n8nadmin \
-  -e DB_POSTGRESDB_PASSWORD='${var.db_password}' \
-  -e N8N_ENCRYPTION_KEY=una-clave-secreta-123 \
+  -e DB_POSTGRESDB_USER=n8nadmin \ 
+  -e DB_POSTGRESDB_PASSWORD="$DB_PASS" \
+  -e N8N_ENCRYPTION_KEY="$ENC_KEY" \
   -e DB_POSTGRESDB_SSL_MODE=require \
   -e DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED=false \
   -e N8N_SECURE_COOKIE=false \
