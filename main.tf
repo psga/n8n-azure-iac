@@ -1,3 +1,6 @@
+# this block is to get the current data of azure 
+data "azurerm_client_config" "current" {}
+
 # 1. Resource group
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
@@ -59,4 +62,10 @@ resource "azurerm_role_assignment" "assign_kv_access" {
   scope                = module.security.key_vault_id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = module.compute.vm_principal_id
+}
+
+resource "azurerm_role_assignment" "pablo_kv_admin" {
+  scope                = module.security.key_vault_id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
 }

@@ -61,6 +61,9 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
   sudo systemctl start docker
   sudo systemctl enable docker
 
+  curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+  sleep 30
+  az login --identity
 
 
   DB_PASS=$(az keyvault secret show --name db-password --vault-name ${var.key_vault_name} --query value -o tsv)
@@ -71,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "n8n_vm" {
   -e DB_POSTGRESDB_HOST=${var.db_host} \
   -e DB_POSTGRESDB_PORT=5432 \
   -e DB_POSTGRESDB_DATABASE=n8n_db \
-  -e DB_POSTGRESDB_USER=n8nadmin \ 
+  -e DB_POSTGRESDB_USER=n8nadmin \
   -e DB_POSTGRESDB_PASSWORD="$DB_PASS" \
   -e N8N_ENCRYPTION_KEY="$ENC_KEY" \
   -e DB_POSTGRESDB_SSL_MODE=require \
