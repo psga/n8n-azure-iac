@@ -8,7 +8,7 @@ This repository provides a production-grade Infrastructure as Code (IaC) impleme
 
 ---
 
-## �️ Architecture Overview
+## ️ Architecture Overview
 
 The infrastructure relies on a decoupled, modular architecture to ensure reusability and localized state management. The orchestration is defined in the root `main.tf`, which integrates the following components:
 
