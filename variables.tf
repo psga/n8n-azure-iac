@@ -3,7 +3,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  default = "centralus" # Pendiente probar 
+  default = "centralus"
 }
 
 variable "vnet_cidr" {
