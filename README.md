@@ -8,7 +8,7 @@ This repository provides a production-grade Infrastructure as Code (IaC) impleme
 
 ---
 
-## ️ Architecture Overview
+## Architecture Overview
 
 The infrastructure relies on a decoupled, modular architecture to ensure reusability and localized state management. The orchestration is defined in the root `main.tf`, which integrates the following components:
 
@@ -21,7 +21,7 @@ The infrastructure relies on a decoupled, modular architecture to ensure reusabi
 
 ---
 
-## 🛡️ Security Posture
+## Security Posture
 
 Security is integrated at the core of the deployment utilizing Azure's native IAM and Zero Trust models:
 
@@ -31,7 +31,7 @@ Security is integrated at the core of the deployment utilizing Azure's native IA
 
 ---
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 Ensure the deployment environment satisfies the following dependencies:
 
@@ -41,7 +41,7 @@ Ensure the deployment environment satisfies the following dependencies:
 
 ---
 
-## 🚀 Deployment Operations
+## Deployment Operations
 
 1. **Initialize the Working Directory**
    Prepare the backend and download the required AzureRM provider plugins:
@@ -66,7 +66,7 @@ Ensure the deployment environment satisfies the following dependencies:
 
 ---
 
-## 🔧 Maintenance and State Management
+## Maintenance and State Management
 
 - **Remote Backend Recommendation:** While this repository defaults to a local state execution for rapid prototyping, it is **strongly advised** to migrate the Terraform state to an **Azure Storage Account** backend with Blob versioning and state locking configured prior to production workloads.
 - **Credential Rotation:** Since secrets are managed by Azure Key Vault, they can be rotated seamlessly without requiring redeployment of compute assets, adhering to standard compliance regulations.
