@@ -14,3 +14,6 @@ output "server_db_password" {
 output "name_servers" {
   value = module.dns.name_servers
 }
+output "gateway_ip" {
+  value = module.load_balancer.gateway_ip
+}

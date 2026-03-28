@@ -37,4 +37,13 @@ module "dns" {
   source              = "./modules/DNS"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
+  gateway_ip          = module.load_balancer.gateway_ip
+}
+
+module "load_balancer" {
+  source              = "./modules/load_balancer"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  gateway_subnet_id   = module.network.gateway_subnet_id
+  vm_private_ip       = module.compute.vm_private_ip
 }

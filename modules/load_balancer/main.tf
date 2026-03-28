@@ -1,3 +1,5 @@
+#  The public IP for the gateway
+# Must be SKU "Standart" and the asignation Static to work with app gateway
 resource "azurerm_public_ip" "gw_ip" {
   name                = "pip-gateway"
   resource_group_name = var.resource_group_name
@@ -5,110 +7,70 @@ resource "azurerm_public_ip" "gw_ip" {
   allocation_method   = "Static"
   sku                 = "Standard"
 }
-
-resource "tls_private_key" "example" {
-  algorithm = "RSA"
-}
-resource "tls_self_signed_cert" "example" {
-  private_key_pem = tls_private_key.example.private_key_pem
-
-  subject {
-    common_name = "pusuga.me"
-  }
-  validity_period_hours = 8760
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth"
-  ]
-}
-
+# The application gateway  (the network brain)
 resource "azurerm_application_gateway" "network" {
   name                = "appgw-n8n"
   resource_group_name = var.resource_group_name
   location            = var.location
 
   sku {
-    name = "Standard_v2" # Aqui pondriamos el WAF 'WAF_v2'
-    tier = "Standard_v2" # Aqui pondriamos el WAF 'WAF_v2'
-
-    capacity = 1
+    name     = "Standard_v2" # In this option we can use the firewall WAF  
+    tier     = "Standard_v2"
+    capacity = 1 # The minimun capacity to save costs 
   }
+  ssl_policy {
+    policy_type = "Predefined"
+    policy_name = "AppGwSslPolicy20220101" # Esta versión soporta TLS 1.2 y es moderna
+  }
+
+  # configuration of the gateway ip 
   gateway_ip_configuration {
     name      = "my-gateway-ip-configuration"
     subnet_id = var.gateway_subnet_id
   }
 
+  # Puertos de entrada (Solo el 80 por ahora para evitar errores de certificado)
   frontend_port {
     name = "port_80"
     port = 80
   }
 
-  frontend_port {
-    name = "port_443"
-    port = 443
-  }
-
+  # IP Pública que el usuario verá en internet
   frontend_ip_configuration {
-    name                 = "my-frontendip"
+    name                 = "my-frontend-ip"
     public_ip_address_id = azurerm_public_ip.gw_ip.id
   }
+
+  # Backend Pool: A donde el Gateway envía el tráfico (Nuestra VM de n8n)
   backend_address_pool {
     name         = "n8n-backend-pool"
-    ip_addresses = [var.vm_private_ip]
+    ip_addresses = [var.vm_private_ip] # Recibe la IP privada de la VM desde la raíz
   }
+
+  # Configuración HTTP del Backend: Cómo habla el Gateway con n8n
   backend_http_settings {
     name                  = "http-settings-n8n"
     cookie_based_affinity = "Disabled"
-    port                  = 5678
-    protocol              = "http"
+    port                  = 5678 # n8n escucha por defecto en el 5678
+    protocol              = "Http"
     request_timeout       = 60
   }
+
+  # El Listener: El "oído" que escucha las peticiones en el puerto 80
   http_listener {
-    name                           = "listener- http"
-    frontend_ip_configuration_name = "my-frontendip"
+    name                           = "listener-http"
+    frontend_ip_configuration_name = "my-frontend-ip"
     frontend_port_name             = "port_80"
     protocol                       = "Http"
   }
 
-  http_listener {
-    name                           = "listener- https"
-    frontend_ip_configuration_name = "my-frontendip"
-    frontend_port_name             = "port_443"
-    protocol                       = "Https"
-    ssl_certificate_name           = "n8n-cart"
-  }
-  http_listener {
-    name                           = "listener-http"
-    frontend_ip_configuration_name = "my-frontendip"
-    frontend_port_name             = "port_80"
-    protocol                       = "Http"
-  }
-  redirect_configuration {
-    name                 = "http-to-https"
-    redirect_type        = "Permanent"
-    target_listener_name = "listener-https"
-    include_path         = true
-    include_query_string = true
-  }
-  ssl_certificate {
-    name     = "n8n-cert"
-    data     = tls_self_signed_cert.example.cert_pem
-    password = "" #in real certs here is the key 
-  }
+  # La Regla de Enrutamiento: Une el Listener con el Backend
   request_routing_rule {
-    name                        = "rule-http-redirect"
-    rule_type                   = "basic"
-    http_listener_name          = "listener-http"
-    redirect_configuration_name = "http-to-https"
-    priority                    = 20
-  }
-  request_routing_rule {
-    name                       = "rule-https-to-n8n"
-    rule_type                  = "basic"
-    http_listener_name         = "listener-https"
+    name                       = "rule-http-to-n8n"
+    rule_type                  = "Basic"
+    http_listener_name         = "listener-http"
     backend_address_pool_name  = "n8n-backend-pool"
     backend_http_settings_name = "http-settings-n8n"
-    priority                   = 10
+    priority                   = 10 # Prioridad requerida en v2
   }
 }
